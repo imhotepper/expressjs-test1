@@ -6,6 +6,7 @@ app.use(express.json());
 
 var cors = require("cors");
 app.use(cors());
+
 const redis = require("redis");
 
 var client = redis.createClient(process.env.REDIS_URL);
@@ -24,7 +25,7 @@ client.on("ready", () => {
     }
 
     console.log("Value:", value);
-    todos = JSON.parse(value);
+    todos = value ? JSON.parse(value) : [];
   });
 });
 
@@ -37,7 +38,7 @@ app.post("/api/todos", (req, res) => {
   const newTodo = req.body;
   todos.push(newTodo);
   client.set("todos", JSON.stringify(todos), redis.print);
-  res.json(req.body);
+  res.status(2010).json(req.body);
 });
 
 //create a server object:
