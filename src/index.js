@@ -23,7 +23,7 @@ app.post("/api/todos", (req, res) => {
 
 //create a server object:
 app.get("/", function (req, res) {
-  res.write("Hello World!..."); //write a response to the client
+  res.write("Welcome to the Todos API!"); //write a response to the client
   res.end(); //end the response
 });
 
