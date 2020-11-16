@@ -34,11 +34,10 @@ app.get("/api/todos", (req, res) => {
 });
 
 app.post("/api/todos", (req, res) => {
-  console.log("received: " + JSON.stringify(req.body.title));
   const newTodo = req.body;
   todos.push(newTodo);
   client.set("todos", JSON.stringify(todos), redis.print);
-  res.status(2010).json(req.body);
+  res.status(201).json(newTodo);
 });
 
 //create a server object:
@@ -47,6 +46,8 @@ app.get("/", function (req, res) {
   res.end(); //end the response
 });
 
-app.listen(process.env.PORT || 8080, function () {
-  console.log("server running on 8080");
+const port = process.env.PORT || 8080;
+
+app.listen(port, function () {
+  console.log(`server running on ${port}`);
 }); //the server object listens on port 8080
