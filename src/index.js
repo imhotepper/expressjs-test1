@@ -1,42 +1,40 @@
 const express = require("express");
 const app = express();
 
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 var cors = require("cors");
 app.use(cors());
 
-const redis = require("redis");
+let todos = [];
 
-var client = redis.createClient(process.env.REDIS_URL);
+const redis = require("async-redis");
+const client = redis.createClient(process.env.REDIS_URL || "");
+
 client.on("error", function (err) {
   console.log("Error " + err);
 });
 
-let todos = [];
-
-client.on("ready", () => {
+client.on("ready", async () => {
   console.log("Connected");
 
-  client.get("todos", (err, value) => {
-    if (err) {
-      throw err;
-    }
-
-    console.log("Value:", value);
-    todos = value ? JSON.parse(value) : [];
-  });
+  const value = await client.get("todos");
+  console.log("received from redis: " + value);
+  todos = value ? JSON.parse(value) : [];
 });
 
 app.get("/api/todos", (req, res) => {
   res.json(todos);
 });
 
-app.post("/api/todos", (req, res) => {
+app.post("/api/todos", async (req, res) => {
+  console.log("received: " + JSON.stringify(req.body.title));
+
   const newTodo = req.body;
+  newTodo.id = ++todos.length;
   todos.push(newTodo);
-  client.set("todos", JSON.stringify(todos), redis.print);
+  await client.set("todos", JSON.stringify(todos));
   res.status(201).json(newTodo);
 });
 
